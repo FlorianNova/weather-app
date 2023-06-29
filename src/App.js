@@ -1,13 +1,9 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { uid } from "uid";
 import "./App.css";
 
 const isGoodWeather = true;
-/*
-const filteredActivities = activities.filter(
-  (activity) => isForGoodWeather === isGoodWeather
-);
-*/
+
 const initialActivities = [
   { id: 1, name: "swimming", isForGoodWeather: true },
   { id: 2, name: "biking", isForGoodWeather: false },
@@ -15,9 +11,27 @@ const initialActivities = [
 
 function App() {
   const [activities, setActivities] = useState(initialActivities);
+  const [weather, setWeather] = useState({});
 
-  const [filteredActivities, setFilteredActivities] =
-    useState(initialActivities);
+  useEffect(() => {
+    async function loadWeather() {
+      try {
+        const response = await fetch(
+          `https://example-apis.vercel.app/api/weather`
+        );
+        const data = await response.json();
+        console.log(data);
+        setWeather(data);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+    loadWeather();
+  }, []);
+
+  const filteredActivities = activities.filter(
+    (activity) => activity.isForGoodWeather === isGoodWeather
+  );
 
   function handleAddActivity(data) {
     setActivities([...activities, { ...data, id: uid() }]);
@@ -27,7 +41,11 @@ function App() {
 
   return (
     <div className="App">
-      <List activities={activities} isGoodWeather={isGoodWeather} />
+      <List
+        activities={filteredActivities}
+        isGoodWeather={isGoodWeather}
+        weather={weather}
+      />
       <Form onAddActivity={handleAddActivity} />
     </div>
   );
@@ -59,12 +77,20 @@ function Form({ onAddActivity }) {
   );
 }
 
-function List({ filteredActivities }) {
+function List({ activities, isGoodWeather, weather }) {
+  console.log(weather);
   return (
-    <ul>
-      {filteredActivities.map((filteredActivity) => (
-        <li key={filteredActivity.id}>{filteredActivity.name}</li>
-      ))}
-    </ul>
+    <>
+      {isGoodWeather ? (
+        <h3>The weather is awesome / Go outside and:</h3>
+      ) : (
+        <h2>Bad weather outside / Here's what you can do</h2>
+      )}
+      <ul>
+        {activities.map((activity) => (
+          <li key={activity.id}>{activity.name}</li>
+        ))}
+      </ul>
+    </>
   );
 }
