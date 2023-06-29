@@ -1,12 +1,33 @@
-import './App.css';
+import { React, useState } from "react";
+import { uid } from "uid";
+import "./App.css";
+
+const isGoodWeather = true;
+/*
+const filteredActivities = activities.filter(
+  (activity) => isForGoodWeather === isGoodWeather
+);
+*/
+const initialActivities = [
+  { id: 1, name: "swimming", isForGoodWeather: true },
+  { id: 2, name: "biking", isForGoodWeather: false },
+];
 
 function App() {
+  const [activities, setActivities] = useState(initialActivities);
+
+  const [filteredActivities, setFilteredActivities] =
+    useState(initialActivities);
+
   function handleAddActivity(data) {
-    //set a state with data
+    setActivities([...activities, { ...data, id: uid() }]);
+
     console.log(data);
   }
+
   return (
     <div className="App">
+      <List activities={activities} isGoodWeather={isGoodWeather} />
       <Form onAddActivity={handleAddActivity} />
     </div>
   );
@@ -35,5 +56,15 @@ function Form({ onAddActivity }) {
         <button type="submit">submit</button>
       </form>
     </div>
+  );
+}
+
+function List({ filteredActivities }) {
+  return (
+    <ul>
+      {filteredActivities.map((filteredActivity) => (
+        <li key={filteredActivity.id}>{filteredActivity.name}</li>
+      ))}
+    </ul>
   );
 }
